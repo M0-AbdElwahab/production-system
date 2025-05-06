@@ -294,3 +294,20 @@ if __name__ == "__main__":
             print("\nNo new facts were derived during backward chaining.")
     else:
         print(f"\n✗ Goal '{goal}' CANNOT be achieved with the given rules and facts.")
+print("\n" + "="*50)
+print("STARTING FORWARD CHAINING")
+print("="*50)
+
+resulting_facts_fc, resulting_variables_fc = forward_chaining(rules, facts.copy(), variables.copy())
+
+print("\n" + "="*50)
+print("FORWARD CHAINING RESULT")
+print("="*50)
+
+print("\nFinal Facts:")
+print_facts(resulting_facts_fc)
+
+if "citrus_fruit" in resulting_facts_fc:
+    print("\n✓ The fruit IS a citrus fruit! ")
+else:
+    print("\n✗ The fruit is NOT a citrus fruit. ")
