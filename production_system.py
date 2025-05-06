@@ -194,7 +194,57 @@ def backward_chaining(goal, rules, facts, variables, visited=None, depth=0, cycl
     print(f"\n{indent}[Cycle {current_cycle}] ✗ No rules could satisfy the goal '{goal}'.")
     return False, facts, variables
 
+def forward_chaining(rules, facts, variables):
+    new_facts = set(facts)
+    new_variables = dict(variables)
+    added = True
+    cycle = 0
 
+    while added:
+        added = False
+        cycle += 1
+        print(f"\n[Cycle {cycle}] Forward chaining cycle started.")
+        
+        for rule in rules:
+            conditions_met = []
+
+            for condition in rule["conditions"]:
+                if condition in new_facts or evaluate_condition(condition, new_facts, new_variables):
+                    conditions_met.append(True)
+                else:
+                    conditions_met.append(False)
+
+            if rule["operator"] == "AND" and all(conditions_met):
+                conclusion = rule["conclusion"]
+                if conclusion not in new_facts:
+                    new_facts.add(conclusion)
+                    print(f"✓ Rule fired: {rule} ➔ Added new fact: {conclusion}")
+                    added = True
+
+                    
+                    if "=" in conclusion and not any(op in conclusion for op in [">=", "<=", "!=", "=="]):
+                        var_name, var_value = conclusion.split("=", 1)
+                        var_name = var_name.strip()
+                        var_value = var_value.strip()
+                        
+                        try:
+                            var_value = float(var_value)
+                            if var_value.is_integer():
+                                var_value = int(var_value)
+                        except ValueError:
+                            pass
+                        
+                        new_variables[var_name] = var_value
+
+            elif rule["operator"] == "OR" and any(conditions_met):
+                conclusion = rule["conclusion"]
+                if conclusion not in new_facts:
+                    new_facts.add(conclusion)
+                    print(f"✓ Rule fired: {rule} ➔ Added new fact: {conclusion}")
+                    added = True
+
+    return new_facts, new_variables
+    
 def print_facts(facts, indent=""):
     for fact in sorted(facts):
         print(f"{indent}- {fact}")
